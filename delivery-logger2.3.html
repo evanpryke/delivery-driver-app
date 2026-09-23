@@ -1,0 +1,1246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Delivery Location Logger</title>
+  <style>
+
+
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --accent: #3b82f6;
+      --accent-hover: #2563eb;
+      --success: #22c55e;
+      --success-hover: #16a34a;
+      --danger: #ef4444;
+      --danger-hover: #dc2626;
+      --warning: #f59e0b;
+      --orange: #f97316;
+      --orange-hover: #ea580c;
+    }
+
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+      line-height: 1.4;
+    }
+
+    .container {
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .setup-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    label {
+      font-size: 0.95rem;
+      color: var(--muted);
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 1rem;
+    }
+
+    input[type="number"] {
+      width: 80px;
+      font-size: 1.1rem;
+      text-align: center;
+    }
+
+    input[type="text"]#routeNumber {
+      width: 140px;
+      flex: 1;
+      max-width: 220px;
+    }
+
+    input[type="number"]:focus,
+    input[type="text"]:focus {
+      outline: 2px solid var(--accent);
+      border-color: transparent;
+    }
+
+    .notes-input {
+      width: 120px;
+      min-width: 100px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+
+    .notes-input:focus {
+      outline: 1px solid var(--accent);
+    }
+
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      color: white;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+    }
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-success {
+      background: var(--success);
+    }
+    .btn-success:hover:not(:disabled) {
+      background: var(--success-hover);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+    }
+    .btn-danger:hover:not(:disabled) {
+      background: var(--danger-hover);
+    }
+
+    .btn-warning {
+      background: var(--warning);
+      color: #111;
+    }
+
+    .btn-orange {
+      background: var(--orange);
+    }
+    .btn-orange:hover:not(:disabled) {
+      background: var(--orange-hover);
+    }
+
+    .btn-sm {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+    }
+
+
+    .worksite {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .worksite-time {
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+
+    .worksite-time span {
+      color: var(--success);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      padding: 10px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
+    }
+
+    td {
+      white-space: nowrap;
+    }
+
+    .stop-num {
+      font-weight: 700;
+      color: var(--orange);
+      width: 36px;
+    }
+
+
+    .address {
+      max-width: 180px;
+      white-space: normal;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.3;
+    }
+
+    .address-edit {
+      width: 100%;
+      max-width: 160px;
+      padding: 4px 6px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-size: 0.8rem;
+    }
+
+    .address-edit:focus {
+      outline: 1px solid var(--accent);
+    }
+
+    .loc-actions {
+      display: flex;
+      gap: 4px;
+      margin-top: 4px;
+      flex-wrap: wrap;
+    }
+
+
+    .time-cell {
+      font-variant-numeric: tabular-nums;
+      font-weight: 500;
+    }
+
+    .minutes {
+      font-weight: 700;
+      color: var(--muted);
+    }
+
+
+
+    .travel-row {
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    .travel-row td {
+      color: var(--muted);
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .travel-label {
+      font-style: italic;
+      color: var(--accent);
+    }
+
+    .travel-mins {
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+
+    .status-msg {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 8px;
+      min-height: 1.2em;
+    }
+
+    .status-msg.error {
+      color: var(--danger);
+    }
+
+    .status-msg.ok {
+      color: var(--success);
+    }
+
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 32px 16px;
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 8px;
+      flex-wrap: wrap;
+    }
+
+    .hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 16px;
+    }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 340px;
+      width: 100%;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .modal-body {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    @media (max-width: 480px) {
+
+      th, td {
+        padding: 8px 6px;
+      }
+      .address {
+        max-width: 120px;
+      }
+      button.btn-sm {
+        padding: 7px 10px;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📍 Delivery Logger</h1>
+    <p class="subtitle">Track stops, times & location</p>
+
+    <!-- Setup -->
+    <div class="card" id="setupCard">
+      <div class="setup-row" style="margin-bottom:12px;">
+        <label for="routeNumber">Route number:</label>
+        <input type="text" id="routeNumber" placeholder="e.g. R12" maxlength="40" />
+      </div>
+      <div class="setup-row">
+        <label for="stopCount">Number of stops:</label>
+        <input type="number" id="stopCount" min="1" max="50" value="" placeholder="e.g. 8" />
+        <button class="btn-primary" id="createBtn">Create rows</button>
+      </div>
+      <p class="hint">Enter your route number and how many deliveries you have today, then create the list.</p>
+    </div>
+
+
+    <!-- Locked route number (shown after setup) -->
+    <div class="card" id="routeDisplayCard" style="display:none;">
+      <div class="setup-row">
+        <label>Route number:</label>
+        <span id="routeDisplay" style="font-weight:700;font-size:1.1rem;color:var(--orange);"></span>
+      </div>
+    </div>
+
+    <!-- Worksite departure -->
+    <div class="card" id="worksiteCard" style="display:none;">
+      <div class="worksite">
+        <div>
+          <strong>Worksite departure</strong>
+          <div class="worksite-time" id="worksiteTime">Not recorded yet</div>
+        </div>
+        <button class="btn-success" id="worksiteDepartBtn">Depart worksite</button>
+      </div>
+    </div>
+
+
+    <!-- Stops table -->
+    <div class="card" id="stopsCard" style="display:none;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Arrive</th>
+              <th>Address</th>
+              <th>Depart</th>
+              <th>Mins</th>
+              <th>Actions</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody id="stopsBody"></tbody>
+        </table>
+      </div>
+      <div class="status-msg" id="statusMsg"></div>
+    </div>
+
+
+    <!-- Worksite return -->
+    <div class="card" id="returnCard" style="display:none;">
+      <div class="worksite">
+        <div>
+          <strong>Return to worksite</strong>
+          <div class="worksite-time" id="returnTime">Not recorded yet</div>
+          <div class="hint" id="totalRunTime" style="margin-top:6px;"></div>
+        </div>
+        <button class="btn-orange" id="worksiteReturnBtn">Arrive worksite</button>
+      </div>
+    </div>
+
+    <!-- Export + Reset -->
+    <div class="footer-actions" id="footerActions" style="display:none;">
+      <button class="btn-primary" id="exportPdfBtn">Export PDF</button>
+      <button class="btn-danger" id="resetBtn">Reset everything</button>
+    </div>
+
+  </div>
+
+  <!-- Custom confirm modal -->
+  <div class="modal-overlay" id="confirmModal" style="display:none;">
+    <div class="modal">
+      <h2 class="modal-title">Confirm reset?</h2>
+      <p class="modal-body">Clear all data and start over?</p>
+      <div class="modal-actions">
+        <button class="btn-primary" id="confirmCancelBtn">Cancel</button>
+        <button class="btn-danger" id="confirmOkBtn">Reset</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <script>
+    // ---------- State ----------
+    const STORAGE_KEY = 'deliveryLoggerState';
+    let stops = [];           // { arriveTime, departTime, address, lat, lon, arriveTs, departTs, notes }
+    let worksiteDepartTs = null;
+    let worksiteDepartStr = null;
+    let worksiteReturnTs = null;
+    let worksiteReturnStr = null;
+    let routeNumber = '';
+
+    // ---------- DOM ----------
+    const stopCountInput = document.getElementById('stopCount');
+    const createBtn = document.getElementById('createBtn');
+    const setupCard = document.getElementById('setupCard');
+    const routeNumberInput = document.getElementById('routeNumber');
+    const routeDisplayCard = document.getElementById('routeDisplayCard');
+    const routeDisplay = document.getElementById('routeDisplay');
+
+    const worksiteCard = document.getElementById('worksiteCard');
+
+    const worksiteTime = document.getElementById('worksiteTime');
+    const worksiteDepartBtn = document.getElementById('worksiteDepartBtn');
+    const stopsCard = document.getElementById('stopsCard');
+    const stopsBody = document.getElementById('stopsBody');
+    const statusMsg = document.getElementById('statusMsg');
+    const returnCard = document.getElementById('returnCard');
+    const returnTime = document.getElementById('returnTime');
+    const totalRunTime = document.getElementById('totalRunTime');
+    const worksiteReturnBtn = document.getElementById('worksiteReturnBtn');
+    const footerActions = document.getElementById('footerActions');
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    const resetBtn = document.getElementById('resetBtn');
+
+
+
+
+    // ---------- Helpers ----------
+    function pad(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function formatTime(date) {
+      return pad(date.getHours()) + ':' + pad(date.getMinutes());
+    }
+
+    function minutesBetween(ts1, ts2) {
+      if (!ts1 || !ts2) return '—';
+      const diff = Math.round((ts2 - ts1) / 60000);
+      return diff >= 0 ? diff : '—';
+    }
+
+    function setStatus(msg, type = '') {
+      statusMsg.textContent = msg;
+      statusMsg.className = 'status-msg' + (type ? ' ' + type : '');
+    }
+
+    // Arrive is only allowed after previous step is complete
+    function canArrive(index) {
+      if (stops[index].arriveTs) return false; // already arrived
+      if (index === 0) return !!worksiteDepartTs; // need worksite depart first
+      return !!stops[index - 1].departTs; // previous stop must be departed
+    }
+
+
+    // ---------- Persistence ----------
+    function saveState() {
+      routeNumber = routeNumberInput.value.trim();
+      const state = {
+        stops,
+        worksiteDepartTs,
+        worksiteDepartStr,
+        worksiteReturnTs,
+        worksiteReturnStr,
+        routeNumber,
+        stopCount: stops.length || parseInt(stopCountInput.value, 10) || 5
+      };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {
+        console.warn('Could not save to localStorage', e);
+      }
+    }
+
+
+    function lastStopDeparted() {
+      if (!stops.length) return false;
+      const last = stops[stops.length - 1];
+      return !!last.departTs;
+    }
+
+    function updateReturnDisplay() {
+      if (worksiteReturnStr) {
+        returnTime.innerHTML = 'Arrived at <span>' + worksiteReturnStr + '</span>';
+        worksiteReturnBtn.disabled = true;
+      } else {
+        returnTime.innerHTML = 'Not recorded yet';
+        // Only unlock after the last delivery has been departed
+        worksiteReturnBtn.disabled = !lastStopDeparted();
+      }
+
+      const parts = [];
+      if (stops.length > 0) {
+        const last = stops[stops.length - 1];
+        if (last.departTs && worksiteReturnTs) {
+          const ret = minutesBetween(last.departTs, worksiteReturnTs);
+          if (ret !== '—') parts.push('Return travel: ' + ret + ' min');
+        }
+      }
+      if (worksiteDepartTs && worksiteReturnTs) {
+        const total = minutesBetween(worksiteDepartTs, worksiteReturnTs);
+        if (total !== '—') parts.push('Total run time: ' + total + ' min');
+      }
+      totalRunTime.textContent = parts.join(' · ');
+    }
+
+
+    function showLockedRoute() {
+      const val = routeNumberInput.value.trim() || routeNumber || '—';
+      routeDisplay.textContent = val;
+      routeDisplayCard.style.display = 'block';
+    }
+
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) return false;
+        const state = JSON.parse(raw);
+        if (!state || !Array.isArray(state.stops) || state.stops.length === 0) return false;
+
+        stops = state.stops.map(s => ({ notes: '', ...s })); // ensure notes field exists
+        worksiteDepartTs = state.worksiteDepartTs || null;
+        worksiteDepartStr = state.worksiteDepartStr || null;
+        worksiteReturnTs = state.worksiteReturnTs || null;
+        worksiteReturnStr = state.worksiteReturnStr || null;
+        routeNumber = state.routeNumber || '';
+        routeNumberInput.value = routeNumber;
+
+        // Restore UI
+        stopCountInput.value = state.stopCount || stops.length;
+        setupCard.style.display = 'none';
+        showLockedRoute();
+        worksiteCard.style.display = 'block';
+        stopsCard.style.display = 'block';
+        returnCard.style.display = 'block';
+        footerActions.style.display = 'flex';
+
+        if (worksiteDepartStr) {
+          worksiteTime.innerHTML = 'Departed at <span>' + worksiteDepartStr + '</span>';
+          worksiteDepartBtn.disabled = true;
+        } else {
+          worksiteTime.innerHTML = 'Not recorded yet';
+          worksiteDepartBtn.disabled = false;
+        }
+
+        updateReturnDisplay();
+        renderTable();
+        setStatus('Previous session restored from this device.');
+        return true;
+
+
+      } catch (e) {
+        console.warn('Could not load from localStorage', e);
+        return false;
+      }
+    }
+
+
+    function clearState() {
+      try {
+        localStorage.removeItem(STORAGE_KEY);
+      } catch (e) {
+        console.warn('Could not clear localStorage', e);
+      }
+    }
+
+    // ---------- Create stops ----------
+    createBtn.addEventListener('click', () => {
+      const n = parseInt(stopCountInput.value, 10);
+      if (!n || n < 1 || n > 50) {
+        alert('Please enter a number between 1 and 50.');
+        return;
+      }
+
+      stops = Array.from({ length: n }, () => ({
+        arriveTime: null,
+        departTime: null,
+        address: null,
+        lat: null,
+        lon: null,
+        arriveTs: null,
+        departTs: null,
+        notes: ''
+      }));
+
+      worksiteDepartTs = null;
+      worksiteDepartStr = null;
+      worksiteReturnTs = null;
+      worksiteReturnStr = null;
+      // Keep route number the user entered on the setup screen
+      routeNumber = routeNumberInput.value.trim();
+      worksiteTime.innerHTML = 'Not recorded yet';
+      worksiteDepartBtn.disabled = false;
+
+      setupCard.style.display = 'none';
+      showLockedRoute();
+      worksiteCard.style.display = 'block';
+      stopsCard.style.display = 'block';
+      returnCard.style.display = 'block';
+      footerActions.style.display = 'flex';
+
+      updateReturnDisplay();
+      renderTable();
+      saveState();
+      setStatus('Rows created. Press “Depart worksite” when you leave base.');
+    });
+
+
+
+
+
+    // ---------- Route number ----------
+    routeNumberInput.addEventListener('change', () => saveState());
+    routeNumberInput.addEventListener('blur', () => saveState());
+
+    // ---------- Worksite depart ----------
+    worksiteDepartBtn.addEventListener('click', () => {
+
+      const now = new Date();
+      worksiteDepartTs = now.getTime();
+      worksiteDepartStr = formatTime(now);
+      worksiteTime.innerHTML = 'Departed at <span>' + worksiteDepartStr + '</span>';
+      worksiteDepartBtn.disabled = true;
+      renderTable(); // unlocks Arrive on stop 1
+      saveState();
+      setStatus('Worksite departure recorded. Drive safely!');
+    });
+
+
+    // ---------- Worksite return ----------
+    worksiteReturnBtn.addEventListener('click', () => {
+      if (!lastStopDeparted()) {
+        setStatus('Finish all deliveries (depart the last stop) before returning to worksite.', 'error');
+        return;
+      }
+      const now = new Date();
+      worksiteReturnTs = now.getTime();
+      worksiteReturnStr = formatTime(now);
+      updateReturnDisplay();
+      renderTable(); // shows final return travel row
+      saveState();
+      const total = worksiteDepartTs ? minutesBetween(worksiteDepartTs, worksiteReturnTs) : null;
+      const last = stops[stops.length - 1];
+      const retTravel = (last && last.departTs)
+        ? minutesBetween(last.departTs, worksiteReturnTs) : null;
+      setStatus(
+        'Returned to worksite at ' + worksiteReturnStr +
+        (retTravel !== null && retTravel !== '—' ? '. Return travel: ' + retTravel + ' min' : '') +
+        (total !== null && total !== '—' ? '. Total run: ' + total + ' min' : ''),
+        'ok'
+      );
+    });
+
+
+
+    // ---------- Render table ----------
+
+    function renderTable() {
+      stopsBody.innerHTML = '';
+
+      stops.forEach((stop, i) => {
+        // --- Travel row BEFORE this stop ---
+        // From worksite → stop 1, or from previous stop depart → this stop arrive
+        const travelTr = document.createElement('tr');
+        travelTr.className = 'travel-row';
+
+        let travelMins = '—';
+        let travelLabel = '';
+
+        if (i === 0) {
+          travelLabel = 'Travel from worksite';
+          if (worksiteDepartTs && stop.arriveTs) {
+            travelMins = minutesBetween(worksiteDepartTs, stop.arriveTs);
+          }
+        } else {
+          travelLabel = 'Travel from stop ' + i;
+          const prev = stops[i - 1];
+          if (prev.departTs && stop.arriveTs) {
+            travelMins = minutesBetween(prev.departTs, stop.arriveTs);
+          }
+        }
+
+        travelTr.innerHTML = `
+          <td></td>
+          <td colspan="3" class="travel-label">${travelLabel}</td>
+          <td class="travel-mins">${travelMins}${travelMins !== '—' ? ' min' : ''}</td>
+          <td></td>
+          <td></td>
+        `;
+        stopsBody.appendChild(travelTr);
+
+        // --- Stop row ---
+        const tr = document.createElement('tr');
+        const mins = minutesBetween(stop.arriveTs, stop.departTs);
+        const notesVal = (stop.notes || '').replace(/"/g, '&quot;');
+        const addrVal = (stop.address && stop.address !== 'Location unavailable')
+          ? String(stop.address).replace(/"/g, '&quot;') : '';
+
+        let addressHtml;
+        if (!stop.arriveTs) {
+          addressHtml = '—';
+        } else {
+          // Manual address only — type into the box (saves on blur)
+          addressHtml = `
+            <input type="text" class="address-edit" data-index="${i}"
+              placeholder="Type address…" value="${addrVal}" />
+          `;
+        }
+
+
+        tr.innerHTML = `
+          <td class="stop-num">${i + 1}</td>
+          <td class="time-cell">${stop.arriveTime || '—'}</td>
+          <td class="address">${addressHtml}</td>
+          <td class="time-cell">${stop.departTime || '—'}</td>
+          <td class="minutes">${mins}${mins !== '—' ? ' min' : ''}</td>
+          <td>
+            <div class="actions">
+              <button class="btn-orange btn-sm" data-action="arrive" data-index="${i}"
+                ${!canArrive(i) ? 'disabled' : ''}>Arrive</button>
+              <button class="btn-success btn-sm" data-action="depart" data-index="${i}"
+                ${!stop.arriveTs || stop.departTs ? 'disabled' : ''}>Depart</button>
+            </div>
+          </td>
+          <td>
+            <input type="text" class="notes-input" data-index="${i}"
+              placeholder="Notes…" value="${notesVal}" />
+          </td>
+        `;
+        stopsBody.appendChild(tr);
+      });
+
+      // --- Final travel: last stop → worksite ---
+      if (stops.length > 0) {
+        const last = stops[stops.length - 1];
+        let returnTravelMins = '—';
+        if (last.departTs && worksiteReturnTs) {
+          returnTravelMins = minutesBetween(last.departTs, worksiteReturnTs);
+        }
+        const returnTr = document.createElement('tr');
+        returnTr.className = 'travel-row';
+        returnTr.innerHTML = `
+          <td></td>
+          <td colspan="3" class="travel-label">Travel back to worksite</td>
+          <td class="travel-mins">${returnTravelMins}${returnTravelMins !== '—' ? ' min' : ''}</td>
+          <td></td>
+          <td></td>
+        `;
+        stopsBody.appendChild(returnTr);
+      }
+
+      // Attach listeners
+      stopsBody.querySelectorAll('button[data-action]').forEach(btn => {
+        btn.addEventListener('click', onActionClick);
+      });
+
+      // Notes + address inputs — save on change/blur
+      stopsBody.querySelectorAll('input.notes-input').forEach(input => {
+        input.addEventListener('change', onNotesChange);
+        input.addEventListener('blur', onNotesChange);
+      });
+      stopsBody.querySelectorAll('input.address-edit').forEach(input => {
+        input.addEventListener('change', onAddressChange);
+        input.addEventListener('blur', onAddressChange);
+      });
+    }
+
+    function onNotesChange(e) {
+      const index = parseInt(e.target.dataset.index, 10);
+      if (stops[index]) {
+        stops[index].notes = e.target.value;
+        saveState();
+      }
+    }
+
+    function onAddressChange(e) {
+      const index = parseInt(e.target.dataset.index, 10);
+      if (stops[index]) {
+        stops[index].address = e.target.value.trim();
+        saveState();
+      }
+    }
+
+
+
+
+
+    // ---------- Arrive / Depart / Address ----------
+    async function onActionClick(e) {
+      const btn = e.currentTarget;
+      const action = btn.dataset.action;
+      const index = parseInt(btn.dataset.index, 10);
+      const stop = stops[index];
+
+      if (action === 'arrive') {
+        if (!canArrive(index)) return;
+        btn.disabled = true;
+
+        // Record time only — address is typed in manually
+        const now = new Date();
+        stop.arriveTs = now.getTime();
+        stop.arriveTime = formatTime(now);
+        if (!stop.address || stop.address === 'Location unavailable') {
+          stop.address = '';
+        }
+        renderTable();
+        saveState();
+        setStatus('Arrival time recorded for stop ' + (index + 1) + '. Type the address if needed.', 'ok');
+      }
+
+
+
+      if (action === 'depart') {
+        if (!stop.arriveTs) return;
+        const now = new Date();
+        stop.departTs = now.getTime();
+        stop.departTime = formatTime(now);
+        setStatus('Departure recorded for stop ' + (index + 1) + '. Time on site: ' +
+          minutesBetween(stop.arriveTs, stop.departTs) + ' min', 'ok');
+        renderTable();
+        updateReturnDisplay(); // unlock Arrive worksite after last stop departs
+        saveState();
+      }
+
+
+    }
+
+
+    // ---------- Export PDF (no external library) ----------
+    function monthName(m) {
+      return ['January','February','March','April','May','June',
+              'July','August','September','October','November','December'][m];
+    }
+
+    function buildPdfFilename() {
+      const route = (routeNumberInput.value.trim() || 'Route');
+      const refTs = worksiteDepartTs || worksiteReturnTs || Date.now();
+      const d = new Date(refTs);
+      const datePart = d.getDate() + ' ' + monthName(d.getMonth()) + ' ' + d.getFullYear();
+      const start = worksiteDepartStr || '----';
+      const finish = worksiteReturnStr || '----';
+      const safe = (s) => String(s).replace(/[\\/:*?"<>|]/g, '-').trim();
+      return safe(route + ', ' + datePart + ', ' + start + ' - ' + finish) + '.pdf';
+    }
+
+    // Minimal PDF writer — works offline / file:// with no CDN
+    function createSimplePdf(lines) {
+      // A4: 595.28 x 841.89 points. Margin ~40pt. Font size 11, leading 16.
+      const pageW = 595.28;
+      const pageH = 841.89;
+      const margin = 50;
+      const fontSize = 11;
+      const leading = 15;
+      const maxChars = 90; // approximate wrap width for Helvetica 11pt
+
+      function wrap(str) {
+        const s = String(str);
+        if (s.length <= maxChars) return [s];
+        const out = [];
+        let rest = s;
+        while (rest.length > maxChars) {
+          let breakAt = rest.lastIndexOf(' ', maxChars);
+          if (breakAt < maxChars * 0.5) breakAt = maxChars;
+          out.push(rest.slice(0, breakAt));
+          rest = rest.slice(breakAt).trimStart();
+        }
+        if (rest) out.push(rest);
+        return out;
+      }
+
+      // Expand all lines with wrapping
+      const wrapped = [];
+      lines.forEach(line => {
+        wrap(line).forEach(w => wrapped.push(w));
+      });
+
+      const usableH = pageH - margin * 2;
+      const linesPerPage = Math.floor(usableH / leading);
+      const pages = [];
+      for (let i = 0; i < wrapped.length; i += linesPerPage) {
+        pages.push(wrapped.slice(i, i + linesPerPage));
+      }
+      if (pages.length === 0) pages.push(['']);
+
+      // Escape PDF string
+      function esc(t) {
+        return String(t)
+          .replace(/\\/g, '\\\\')
+          .replace(/\(/g, '\\(')
+          .replace(/\)/g, '\\)')
+          // PDF standard fonts are Latin-1-ish; strip unsupported chars
+          .replace(/[^\x20-\x7E]/g, '?');
+      }
+
+      const objects = [];
+      function addObj(content) {
+        objects.push(content);
+        return objects.length; // 1-based id
+      }
+
+      // 1: Catalog
+      // 2: Pages
+      // then page objects + content streams
+      const pageIds = [];
+      const contentIds = [];
+
+      pages.forEach((pageLines) => {
+        let stream = 'BT\n/F1 ' + fontSize + ' Tf\n';
+        let y = pageH - margin - fontSize;
+        pageLines.forEach((line) => {
+          stream += '1 0 0 1 ' + margin + ' ' + y.toFixed(2) + ' Tm\n(' + esc(line) + ') Tj\n';
+          y -= leading;
+        });
+        stream += 'ET';
+
+        const contentId = addObj(null); // placeholder, fill later
+        contentIds.push(contentId);
+        objects[contentId - 1] = '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream';
+
+        const pageId = addObj(null);
+        pageIds.push(pageId);
+      });
+
+      // Font object
+      const fontId = addObj('<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
+
+      // Fill page objects (need fontId and contentIds)
+      pageIds.forEach((pageId, idx) => {
+        objects[pageId - 1] =
+          '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageW + ' ' + pageH + '] ' +
+          '/Contents ' + contentIds[idx] + ' 0 R /Resources << /Font << /F1 ' + fontId + ' 0 R >> >> >>';
+      });
+
+      // Pages object (id 2) — must be fixed at index 1
+      // Catalog (id 1) at index 0
+      // We need to insert catalog and pages at the start carefully.
+      // Rebuild with fixed IDs: 1=Catalog, 2=Pages, then the rest we already have.
+      // Simpler approach: build final object list in order.
+
+      const kids = pageIds.map(id => id + ' 0 R').join(' ');
+      // Actually objects array is already 0-indexed for id-1.
+      // Insert catalog and pages as objects 1 and 2 by reconstructing.
+
+      // Re-do with explicit ordering for reliability
+      return buildPdfFromPages(pages, pageW, pageH, margin, fontSize, leading, esc);
+    }
+
+    function buildPdfFromPages(pages, pageW, pageH, margin, fontSize, leading, esc) {
+      const objs = []; // 1-based content strings
+
+      // We'll assign:
+      // 1 Catalog, 2 Pages, 3 Font, then pairs of (Content, Page) for each page
+
+      objs[1] = null; // catalog — filled later
+      objs[2] = null; // pages — filled later
+      objs[3] = '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>';
+
+      const pageObjIds = [];
+
+      pages.forEach((pageLines) => {
+        let stream = 'BT\n/F1 ' + fontSize + ' Tf\n';
+        let y = pageH - margin - fontSize;
+        pageLines.forEach((line) => {
+          stream += '1 0 0 1 ' + margin + ' ' + y.toFixed(2) + ' Tm\n(' + esc(line) + ') Tj\n';
+          y -= leading;
+        });
+        stream += 'ET';
+
+        const contentId = objs.length;
+        objs[contentId] = '<< /Length ' + stream.length + ' >>\nstream\n' + stream + '\nendstream';
+
+        const pageId = objs.length;
+        objs[pageId] =
+          '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ' + pageW + ' ' + pageH + '] ' +
+          '/Contents ' + contentId + ' 0 R /Resources << /Font << /F1 3 0 R >> >> >>';
+        pageObjIds.push(pageId);
+      });
+
+      objs[2] = '<< /Type /Pages /Kids [' + pageObjIds.map(id => id + ' 0 R').join(' ') +
+                '] /Count ' + pageObjIds.length + ' >>';
+      objs[1] = '<< /Type /Catalog /Pages 2 0 R >>';
+
+      // Build file
+      let pdf = '%PDF-1.4\n';
+      const offsets = [0];
+      for (let i = 1; i < objs.length; i++) {
+        offsets[i] = pdf.length;
+        pdf += i + ' 0 obj\n' + objs[i] + '\nendobj\n';
+      }
+      const xrefPos = pdf.length;
+      pdf += 'xref\n0 ' + objs.length + '\n';
+      pdf += '0000000000 65535 f \n';
+      for (let i = 1; i < objs.length; i++) {
+        pdf += String(offsets[i]).padStart(10, '0') + ' 00000 n \n';
+      }
+      pdf += 'trailer\n<< /Size ' + objs.length + ' /Root 1 0 R >>\n';
+      pdf += 'startxref\n' + xrefPos + '\n%%EOF';
+      return pdf;
+    }
+
+    function exportPdf() {
+      const lines = [];
+      lines.push('DELIVERY RUN LOG');
+      lines.push('');
+      lines.push('Route number: ' + (routeNumberInput.value.trim() || '—'));
+      lines.push('Worksite departure: ' + (worksiteDepartStr || '—'));
+      lines.push('Worksite return: ' + (worksiteReturnStr || '—'));
+      if (worksiteDepartTs && worksiteReturnTs) {
+        const total = minutesBetween(worksiteDepartTs, worksiteReturnTs);
+        lines.push('Total run time: ' + (total !== '—' ? total + ' min' : '—'));
+      }
+      lines.push('');
+      lines.push('----------------------------------------');
+
+      stops.forEach((stop, i) => {
+        lines.push('');
+        // Travel
+        let travelLabel, travelMins = '—';
+        if (i === 0) {
+          travelLabel = 'Travel from worksite';
+          if (worksiteDepartTs && stop.arriveTs) {
+            travelMins = minutesBetween(worksiteDepartTs, stop.arriveTs);
+          }
+        } else {
+          travelLabel = 'Travel from stop ' + i;
+          const prev = stops[i - 1];
+          if (prev.departTs && stop.arriveTs) {
+            travelMins = minutesBetween(prev.departTs, stop.arriveTs);
+          }
+        }
+        lines.push(travelLabel + ': ' + (travelMins !== '—' ? travelMins + ' min' : '—'));
+        lines.push('STOP ' + (i + 1));
+        lines.push('  Arrive: ' + (stop.arriveTime || '—'));
+        lines.push('  Depart: ' + (stop.departTime || '—'));
+        const onSite = minutesBetween(stop.arriveTs, stop.departTs);
+        lines.push('  Time on site: ' + (onSite !== '—' ? onSite + ' min' : '—'));
+        const rawAddr = (stop.address || '').trim();
+        const addr = (rawAddr && rawAddr !== 'Location unavailable') ? rawAddr : '';
+        lines.push('  Address: ' + addr);
+
+        if (stop.notes && stop.notes.trim()) {
+          lines.push('  Notes: ' + stop.notes.trim());
+        }
+      });
+
+      // Final return travel
+      if (stops.length > 0) {
+        const last = stops[stops.length - 1];
+        let returnTravelMins = '—';
+        if (last.departTs && worksiteReturnTs) {
+          returnTravelMins = minutesBetween(last.departTs, worksiteReturnTs);
+        }
+        lines.push('');
+        lines.push('Travel back to worksite: ' +
+          (returnTravelMins !== '—' ? returnTravelMins + ' min' : '—'));
+      }
+
+      lines.push('');
+      lines.push('----------------------------------------');
+      lines.push('Generated by Delivery Logger copyright 2026. The Delivery Logger application was created by Evan Pryke. All rights reserved.');
+
+      lines.push('Exported: ' + new Date().toLocaleString());
+
+      const pdfString = createSimplePdf(lines);
+
+      const filename = buildPdfFilename();
+
+      // Download
+      const blob = new Blob([pdfString], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+
+      setStatus('PDF saved as: ' + filename, 'ok');
+    }
+
+    exportPdfBtn.addEventListener('click', exportPdf);
+
+
+    // ---------- Reset (custom modal) ----------
+    const confirmModal = document.getElementById('confirmModal');
+    const confirmOkBtn = document.getElementById('confirmOkBtn');
+    const confirmCancelBtn = document.getElementById('confirmCancelBtn');
+
+
+    function doReset() {
+      stops = [];
+      worksiteDepartTs = null;
+      worksiteDepartStr = null;
+      worksiteReturnTs = null;
+      worksiteReturnStr = null;
+      routeNumber = '';
+      routeNumberInput.value = '';
+      clearState();
+
+      stopCountInput.value = '';
+      setupCard.style.display = 'block';
+      routeDisplayCard.style.display = 'none';
+      routeDisplay.textContent = '';
+      worksiteCard.style.display = 'none';
+      stopsCard.style.display = 'none';
+      returnCard.style.display = 'none';
+      footerActions.style.display = 'none';
+      worksiteTime.innerHTML = 'Not recorded yet';
+      worksiteDepartBtn.disabled = false;
+      updateReturnDisplay();
+      stopsBody.innerHTML = '';
+      setStatus('');
+    }
+
+
+
+    resetBtn.addEventListener('click', () => {
+      confirmModal.style.display = 'flex';
+    });
+
+    confirmCancelBtn.addEventListener('click', () => {
+      confirmModal.style.display = 'none';
+    });
+
+    confirmOkBtn.addEventListener('click', () => {
+      confirmModal.style.display = 'none';
+      doReset();
+    });
+
+    // Close modal if clicking the dark backdrop
+    confirmModal.addEventListener('click', (e) => {
+      if (e.target === confirmModal) confirmModal.style.display = 'none';
+    });
+
+
+
+    // ---------- Init: restore previous session if any ----------
+    loadState();
+  </script>
+
+</body>
+</html>
